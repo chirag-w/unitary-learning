@@ -1,5 +1,5 @@
 #Construct the database of input states and outputs described in Eq. 7 of 'Learning to predict arbitrary quantum processes',Huang, Chen and Preskill
-from util import *
+import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.extensions import UnitaryGate
 from qiskit import Aer
@@ -55,11 +55,11 @@ def apply_unitary_measure(U,input_states):
                 result[i][qubit] = 2*bases[i][qubit]
     return result
 
-n = 8
-N = 10
-U = np.eye(2**n)
-inp, out = construct_dataset(U, N, n)
-for i in range(N):
-    print(inp[i])
-    print(out[i])
-    print()
+# n = 8
+# N = 10
+# U = np.eye(2**n)
+# inp, out = construct_dataset(U, N, n)
+# for i in range(N):
+#     print(inp[i])
+#     print(out[i])
+#     print()
