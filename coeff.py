@@ -21,6 +21,45 @@ def generate_paulis(inp,n,k):
                 paulis.add(''.join(s))
     return paulis
 
+def coeff_pauli(P,inp,out,k):
+    N = len(inp)
+    n = len(inp[0])
+    coeff = 0
+    for l in range(N):
+        zero = False
+        sign = 1
+        for i in range(n):
+            if P[i] != '3' and str(int(inp[l][i]/2)) != P[i]:
+                #Trace is zero 
+                zero = True
+                break
+            elif P[i] != '3' and inp[l][i]%2 == 1: 
+                #This qubit is in negative eigenstate
+                sign *= -1
+            else:
+                #This state is either in positive eigenstate or the Pauli is identity   
+                continue
+        if zero:
+            continue
+        else:
+            coeff += sign*quantity()
+    coeff = coeff/N
+    return coeff
+
+def mod_pauli(P):
+    #Number of non-identity terms in a Pauli product observable
+    count = 0
+    for obs in P:
+        if obs!='3':
+            count+=1
+    return count
+
+def quantity():
+    #Placeholder function
+    return 0
+    
+
+
 # n = 4
 # k = 2
 # N = 3
