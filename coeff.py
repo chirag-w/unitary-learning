@@ -21,7 +21,7 @@ def generate_paulis(inp,n,k):
                 paulis.add(''.join(s))
     return paulis
 
-def coeff_pauli(P,inp,out,k):
+def coeff_pauli(P,inp,k,obs_val,sum,eps_tilde = 0.001):
     N = len(inp)
     n = len(inp[0])
     coeff = 0
@@ -42,9 +42,20 @@ def coeff_pauli(P,inp,out,k):
         if zero:
             continue
         else:
-            coeff += sign*quantity()
+            coeff += sign*obs_val[l]
     coeff = coeff/N
-    return coeff
+    mod = mod_pauli(P)
+    
+    if (1/3)**mod < 2*eps_tilde or abs(coeff) < (2 * (3**(mod/2)) * np.sqrt(eps_tilde) * sum):
+        return 0
+    return coeff * (3**mod)
+
+def sum_coeff(O):
+    #Sum of absolute values of the coefficients of O in the Pauli basis
+    sum = 0
+    for obs in O:
+        sum+= abs(O[obs])
+    return sum
 
 def mod_pauli(P):
     #Number of non-identity terms in a Pauli product observable
@@ -54,18 +65,39 @@ def mod_pauli(P):
             count+=1
     return count
 
-def quantity():
+def shadow_observable(O,shadow):
     #Placeholder function
-    return 0
-    
+    N = len(shadow)
+    n = len(shadow[0])
+    val = np.zeros(N, dtype = float)
+    for l in range(N):
+        for obs in O:
+            prod = O[obs]
+            for i in range(n):
+                if obs[i] == '3': #If observable is identity, trace is 1
+                    continue
+                elif str(int(shadow[l][i]/2)) != obs[i]: #If observable doesn't match, trace is -2
+                    prod*= -2
+                elif shadow[l][i]%2 == 1: #If observable matches but the eigenvalue is negative,  trace is -5
+                    prod*= -5
+                else: #Observable matches and positive eigenstate, trace is 1
+                    continue
+            val[l] += prod
+    return val
 
 
-# n = 4
-# k = 2
-# N = 3
+# n = 6
+# k = 1
+# N = 50
 # U = np.eye(2**n)
 # inp, out = construct_dataset(U,N,n)
-# for i in range(N):
-#     print(inp[i])
+# O = {'133333':1,'313333':1,'331333':1,'333133':1,'333313':1,'333331':1}
+# obs_val = shadow_observable(O,out)
 # paulis = generate_paulis(inp,n,k)
-# print(paulis)
+# x = {}
+# sum = sum_coeff(O)
+# for P in paulis:
+#     coeff = coeff_pauli(P,inp,k,obs_val,sum)
+#     if coeff!= 0 :
+#         x[P] = coeff
+# print(x)
