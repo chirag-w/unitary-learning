@@ -21,7 +21,7 @@ def generate_paulis(inp,n,k):
                 paulis.add(''.join(s))
     return paulis
 
-def coeff_pauli(P,inp,k,obs_val,sum,eps_tilde = 0.001):
+def coeff_pauli(P,inp,k,obs_val,sum,eps_tilde = 0.0001):
     N = len(inp)
     n = len(inp[0])
     coeff = 0
@@ -76,28 +76,28 @@ def shadow_observable(O,shadow):
             for i in range(n):
                 if obs[i] == '3': #If observable is identity, trace is 1
                     continue
-                elif str(int(shadow[l][i]/2)) != obs[i]: #If observable doesn't match, trace is -2
-                    prod*= -2
-                elif shadow[l][i]%2 == 1: #If observable matches but the eigenvalue is negative,  trace is -5
-                    prod*= -5
-                else: #Observable matches and positive eigenstate, trace is 1
-                    continue
+                elif str(int(shadow[l][i]/2)) != obs[i]: #If observable doesn't match, trace is 0
+                    prod*= 0
+                elif shadow[l][i]%2 == 1: #If observable matches but the eigenvalue is negative,  trace is -3
+                    prod*= -3
+                else: #Observable matches and positive eigenstate, trace is 3
+                    prod*= 3
             val[l] += prod
     return val
 
 
-# n = 6
-# k = 1
-# N = 50
-# U = np.eye(2**n)
-# inp, out = construct_dataset(U,N,n)
-# O = {'133333':1,'313333':1,'331333':1,'333133':1,'333313':1,'333331':1}
-# obs_val = shadow_observable(O,out)
-# paulis = generate_paulis(inp,n,k)
-# x = {}
-# sum = sum_coeff(O)
-# for P in paulis:
-#     coeff = coeff_pauli(P,inp,k,obs_val,sum)
-#     if coeff!= 0 :
-#         x[P] = coeff
-# print(x)
+n = 6
+k = 1
+N = 5000
+U = np.eye(2**n)
+inp, out = construct_dataset(U,N,n)
+O = {'133333':1,'313333':1,'331333':1,'333133':1,'333313':1,'333331':1}
+obs_val = shadow_observable(O,out)
+paulis = generate_paulis(inp,n,k)
+x = {}
+sum = sum_coeff(O)
+for P in paulis:
+    coeff = coeff_pauli(P,inp,k,obs_val,sum)
+    if coeff!= 0 :
+        x[P] = coeff
+print(x)
