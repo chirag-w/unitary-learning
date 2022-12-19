@@ -85,19 +85,14 @@ def shadow_observable(O,shadow):
             val[l] += prod
     return val
 
-
-n = 6
-k = 1
-N = 5000
-U = np.eye(2**n)
-inp, out = construct_dataset(U,N,n)
-O = {'133333':1,'313333':1,'331333':1,'333133':1,'333313':1,'333331':1}
-obs_val = shadow_observable(O,out)
-paulis = generate_paulis(inp,n,k)
-x = {}
-sum = sum_coeff(O)
-for P in paulis:
-    coeff = coeff_pauli(P,inp,k,obs_val,sum)
-    if coeff!= 0 :
-        x[P] = coeff
-print(x)
+def learn(U,O,N,n,k):
+    inp, out = construct_dataset(U,N,n)
+    obs_val = shadow_observable(O,out)
+    paulis = generate_paulis(inp,n,k)
+    x = {} #Coefficients of the approximate k-truncated observable
+    sum = sum_coeff(O)
+    for P in paulis:
+        coeff = coeff_pauli(P,inp,k,obs_val,sum, eps_tilde=0)
+        if coeff!= 0 :
+            x[P] = coeff
+    return x 

@@ -3,6 +3,7 @@ import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.extensions import UnitaryGate
 from qiskit import Aer
+from util import *
 
 def construct_dataset(U,N,n):
     #Returns a dataset containing the classical description of states before and after the unknown unitary is applied
