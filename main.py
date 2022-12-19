@@ -14,7 +14,7 @@ U = np.eye(2**n)
 #     U = np.kron(U,H)
 
 # O = {'111111':1,'222222':1,'333333':1,'000000':1}
-O = {'333333':1}
+O = {'133333':0.1,'313333':0.1,'331333':0.1,'333133':0.1,'333313':0.1,'333331':0.1}
 
 #Target state distribution
 D = []
@@ -38,10 +38,10 @@ for i in range(size_D):
 step = 10
 N_min = 10
 N_max = 500
-k = 1
+eps = 1
 
 for N in range(N_min,N_max+1,step):
-    x = learn(U,O,N,n,k)
+    x = learn(U,O,N,n,eps)
     error = 0.0
     for rho in D:
         pred_val = pred(x,rho)

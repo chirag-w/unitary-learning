@@ -1,5 +1,6 @@
 from dataset import *
 from itertools import *
+import math
 
 #Pauli indices
 # 0 -> Z
@@ -21,7 +22,7 @@ def generate_paulis(inp,n,k):
                 paulis.add(''.join(s))
     return paulis
 
-def coeff_pauli(P,inp,k,obs_val,sum,eps_tilde = 0.0001):
+def coeff_pauli(P,inp,k,obs_val,eta,eps_tilde = 0.0001):
     N = len(inp)
     n = len(inp[0])
     coeff = 0
@@ -46,7 +47,7 @@ def coeff_pauli(P,inp,k,obs_val,sum,eps_tilde = 0.0001):
     coeff = coeff/N
     mod = mod_pauli(P)
     
-    if (1/3)**mod < 2*eps_tilde or abs(coeff) < (2 * (3**(mod/2)) * np.sqrt(eps_tilde) * sum):
+    if (1/3)**mod < 2*eps_tilde or abs(coeff) < (2 * (3**(mod/2)) * np.sqrt(eps_tilde) * eta):
         return 0
     return coeff * (3**mod)
 
@@ -85,14 +86,41 @@ def shadow_observable(O,shadow):
             val[l] += prod
     return val
 
-def learn(U,O,N,n,k):
-    inp, out = construct_dataset(U,N,n)
-    obs_val = shadow_observable(O,out)
+def degree(O,n):
+    #Degree of the n-qubit observable
+    count = np.zeros(n)
+    for obs in O:
+        for qubit in range(n):
+            if obs[qubit]!='3':
+                count[qubit]+=1
+    return int(max(count))
+
+def C_k_d(k,d):
+    if d == 0:
+        return 0
+    numerator = np.sqrt(2 * math.factorial(k))
+    denominator = np.sqrt(d) * (k**(k+2.5)) * ((2 * np.sqrt(6) + 4 * np.sqrt(3))**k)
+    return numerator/denominator
+
+def hyperparams(eps,O,n):
+    k = int(np.ceil(np.log(2/eps)/np.log(1.5)))
+    C = C_k_d(k,degree(O,n))
+    num = eps * C * C
+    denom = 81 * (2**(k+1)) * (n**k)
+    eps_tilde = num/denom
+    return k, eps_tilde
+
+def learn(U,O,N,n,eps):
+    k,eps_tilde = hyperparams(eps,O,n)
+    # print(k,eps_tilde)
+    # eps_tilde = 0
+    inp, out = construct_dataset(U,N,n) #Construct dataset consisting of single-qubit stabilizer states
+    obs_val = shadow_observable(O,out) #Compute output of observable on shadow outputs 
     paulis = generate_paulis(inp,n,k)
     x = {} #Coefficients of the approximate k-truncated observable
-    sum = sum_coeff(O)
+    eta = sum_coeff(O)
     for P in paulis:
-        coeff = coeff_pauli(P,inp,k,obs_val,sum, eps_tilde=0)
+        coeff = coeff_pauli(P,inp,k,obs_val,eta, eps_tilde)
         if coeff!= 0 :
             x[P] = coeff
     return x 
